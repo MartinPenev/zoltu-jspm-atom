@@ -7,6 +7,8 @@
     "atom-workspace": [
       "zoltu-jspm:init",
       "zoltu-jspm:update",
+      "zoltu-jspm:bundle",
+      "zoltu-jspm:unbundle",
       "zoltu-jspm:toggle-install",
       "zoltu-jspm:toggle-uninstall"
     ]

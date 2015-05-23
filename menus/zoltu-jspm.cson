@@ -18,6 +18,10 @@
 					'command': 'zoltu-jspm:update'
 				},
 				{
+					'bundle': 'Bundle'
+					'command': 'zoltu-jspm:bundle'
+				},
+				{
 					'label': 'Init'
 					'command': 'zoltu-jspm:init'
 				}

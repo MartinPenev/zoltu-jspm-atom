@@ -21,6 +21,8 @@ module.exports = ZoltuJspm =
 		# Register commands
 		@subscriptions.add atom.commands.add 'atom-workspace', 'zoltu-jspm:toggle-install': => @jspmProjectCheck => @toggleInstall()
 		@subscriptions.add atom.commands.add 'atom-workspace', 'zoltu-jspm:toggle-uninstall': => @jspmProjectCheck => @toggleUninstall()
+		@subscriptions.add atom.commands.add 'atom-workspace', 'zoltu-jspm:bundle': => @jspmProjectCheck => @bundle()
+		@subscriptions.add atom.commands.add 'atom-workspace', 'zoltu-jspm:unbundle': => @jspmProjectCheck => @unbundle()
 		@subscriptions.add atom.commands.add 'atom-workspace', 'zoltu-jspm:update': => @jspmProjectCheck => @update()
 		@subscriptions.add atom.commands.add 'atom-workspace', 'zoltu-jspm:init': => @jspmProjectCheck => @init()
 		@subscriptions.add atom.commands.add 'zoltu-jspm-text-panel atom-text-editor', 'core:confirm': (event) => @confirm(event)
@@ -66,6 +68,7 @@ module.exports = ZoltuJspm =
 		switch type
 			when "install" then @install(packageName)
 			when "uninstall" then @uninstall(packageName)
+			when "bundle" then @bundle(packageName)
 
 	close: (event) ->
 		@panel.hide()
@@ -78,6 +81,25 @@ module.exports = ZoltuJspm =
 
 	uninstall: (packageName) ->
 		@executeJspm [ 'uninstall', packageName ]
+
+	bundle: () ->
+		packageJson = @pathToJspmPackage()
+		json = require packageJson
+
+		result = [ 'bundle', '"*"' ]
+
+		for name, value of json.jspm.dependencies
+			result.push("+")
+			result.push(name)
+
+		result.push("app-bundle.js")
+		result.push("--inject")
+		result.push("--minify")
+
+		@executeJspm result
+
+	unbundle: () ->
+		@executeJspm ["unbundle"]
 
 	executeJspm: (args) ->
 		if @process
@@ -98,6 +120,9 @@ module.exports = ZoltuJspm =
 	pathToJspm: ->
 		return path.join(atom.project.getPath(), 'node_modules', 'jspm', 'jspm.js')
 
+	pathToJspmPackage: ->
+		return path.join(atom.project.getPath(), 'package.json')
+
 	pathToGitDirectory: ->
 		gitDirectory = "C:\\Program Files (x86)\\Git\\bin\\"
 		if fs.existsSync(gitDirectory)
@@ -107,6 +132,10 @@ module.exports = ZoltuJspm =
 
 	jspmLogInfo: (message) ->
 		message = message.trim()
+
+		if message == ""
+			return
+
 		if message.startsWith("err")
 			type = 'error'
 			message = message.replace('err', '')
